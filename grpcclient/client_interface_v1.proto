@@ -1,0 +1,66 @@
+syntax = "proto3";
+package grainite_client;
+
+option java_package = "grainite.client";
+option java_outer_classname = "Grpc";
+option go_package = "grainite.com/grpcclient";
+
+service Grainite {
+  rpc topicAppend(AppendRequest) returns (AppendResponse) {}
+}
+
+/////// Common //////////
+
+message Status {
+  enum Code {
+    OK = 0;
+    SERVICE_UNAVAILABLE = 1;
+    SERVICE_ERROR = 2;
+    TIMEOUT = 3;
+    INVALID_APP = 4;
+    INVALID_TOPIC = 5;
+    INVALID_TABLE = 6;
+    INVALID_KEY = 7;
+    INVALID_MAPID = 8;
+    INVALID_MAPKEY = 9;
+    INVALID_PAYLOAD = 10;
+    KEY_NOT_FOUND = 11;
+    MAPKEY_NOT_FOUND = 12;
+  }
+  Code error = 1;
+  string error_message = 2;
+}
+
+//////// Topic Append /////////
+
+// RPC request
+// Events to append to one topic, multiple keys.
+message AppendRequest {
+  string app = 1;
+  string topic_name = 2;
+  repeated Event events = 3;
+  uint32 timeout_secs = 4;
+}
+
+// RPC response
+message AppendResponse {
+  repeated EventStatus status = 1;
+  // all events were appended on-or-after this timestamp
+  // (inclusive). So if you set read cursor to this timestamp
+  // and start reading, you will find these events.
+  uint64 min_append_timestamp = 2;
+  // all events are appended on-or-before this timestamp.
+  // So once you have read upto this timestamp (inclusive),
+  // there will be no more of these events.
+  uint64 max_append_timestamp = 3;
+}
+
+message Event {
+  bytes key = 1;
+  bytes payload = 2;
+}
+
+message EventStatus {
+  Status status = 1;
+  bytes lsn = 2;
+}

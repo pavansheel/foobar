@@ -1,0 +1,7 @@
+app_name: myapp
+package_id: org.foo
+
+topics:
+-   topic_name: mytopic
+    key_name: bar
+    key_type: bytes

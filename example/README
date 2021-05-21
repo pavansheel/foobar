@@ -1,0 +1,9 @@
+Start Grainite
+
+Define topic 'mytopic' in Grainite:
+gx app.yml load -j README
+
+Run the Go example:
+go run topicappend.go
+
+Dump topic 'mytopic' to see what was appended.
