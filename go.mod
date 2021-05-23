@@ -1,4 +1,4 @@
-module xxxgithub.com/pavansheel/foobar
+module yyygithub.com/pavansheel/foobar
 
 go 1.16
 
