@@ -24,26 +24,26 @@ func main() {
 	defer conn.Close()
 	grainite := proto.NewGrainiteClient(conn)
 
-	// Send 5 append requests. Each appends 100 events to topic 'mytopic',
-	// using 20 keys.
+	// Send 5 append requests to topic 'mytopic', containing 100 events each.
 	for i := 0; i < 5; i++ {
 		req := &proto.AppendRequest{}
 		req.App = "myapp"
 		req.TopicName = "mytopic"
+		// Add 100 events, over 20 keys
 		for j := 0; j < 100; j++ {
 			var key string = fmt.Sprintf("key_%d", j%20)
 			var payload string = fmt.Sprintf("payload_%d", (i*100)+j)
 			event := &proto.Event{Key: []byte(key), Payload: []byte(payload)}
 			req.Events = append(req.Events, event)
 		}
+		// Make the append request
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		resp, err := grainite.TopicAppend(ctx, req)
 		if err != nil {
 			log.Fatalf("Could not Append: %v", err)
 		}
-		// print out the response
-		//log.Printf("Append result: %v", resp)
+		// Print the response
 		var ok_cnt int = 0
 		var failed_cnt int = 0
 		for _, v := range resp.Status {
