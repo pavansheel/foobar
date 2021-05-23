@@ -26,23 +26,33 @@ func main() {
 
 	// Send 5 append requests. Each appends 100 events to topic 'mytopic',
 	// using 20 keys.
-	req := &proto.AppendRequest{}
-	req.App = "myapp"
-	req.TopicName = "mytopic"
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 	for i := 0; i < 5; i++ {
+		req := &proto.AppendRequest{}
+		req.App = "myapp"
+		req.TopicName = "mytopic"
 		for j := 0; j < 100; j++ {
 			var key string = fmt.Sprintf("key_%d", j%20)
 			var payload string = fmt.Sprintf("payload_%d", (i*100)+j)
 			event := &proto.Event{Key: []byte(key), Payload: []byte(payload)}
 			req.Events = append(req.Events, event)
 		}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 		resp, err := grainite.TopicAppend(ctx, req)
 		if err != nil {
 			log.Fatalf("Could not Append: %v", err)
 		}
 		// print out the response
-		log.Printf("Append result: %v", resp)
+		//log.Printf("Append result: %v", resp)
+		var ok_cnt int = 0
+		var failed_cnt int = 0
+		for _, v := range resp.Status {
+			if v.Status.Error == 0 {
+				ok_cnt++
+			} else {
+				failed_cnt++
+			}
+		}
+		log.Printf("Append: %v success %v failed", ok_cnt, failed_cnt)
 	}
 }
